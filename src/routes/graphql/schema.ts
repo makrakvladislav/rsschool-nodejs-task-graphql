@@ -1,7 +1,7 @@
 import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString } from "graphql";
 import { ProfileEntity } from "../../utils/DB/entities/DBProfiles";
 import { UserEntity } from "../../utils/DB/entities/DBUsers";
-import { memberType, postType, profileType, usersAllFields, userType } from "./types";
+import { memberType, memberTypeInput, postInput, postType, profileInput, profileType, userInput, usersAllFields, userType } from "./types";
 
 export const graphqlBodySchema = {
   type: "object",
@@ -183,7 +183,116 @@ const queryType = new GraphQLObjectType({
   },
 });
 
+const mutationType = new GraphQLObjectType({
+  name: "Mutation",
+  fields: {
+    createUser: {
+      type: userType,
+      args: { input: { type: userInput } },
+      async resolve(source, args, context) {
+        const createUser: UserEntity = await context.db.users.create(args.input);
+        return createUser;
+      },
+    },
+    createProfile: {
+      type: profileType,
+      args: { input: { type: profileInput } },
+      async resolve(source, args, context) {
+        const user = await context.db.users.findOne({ key: "id", equals: args.input.userId });
+        if (user === null || !user) {
+          throw new Error(`User ${args.input.userId} not exist`);
+        }
+        const profile = await context.db.profiles.findOne({ key: "userId", equals: args.input.userId });
+        if (profile !== null) {
+          throw new Error(`Profile ${args.input.userId} not exist`);
+        }
+        const memberType = await context.db.memberTypes.findOne({ key: "id", equals: args.input.memberTypeId });
+        if (memberType === null || !memberType) {
+          throw new Error(`MemberType ${args.input.userId} not exist`);
+        }
+        const createProfile: ProfileEntity = await context.db.profiles.create(args.input);
+        return createProfile;
+      },
+    },
+    createPost: {
+      type: postType,
+      args: { input: { type: postInput } },
+      async resolve(source, args, context) {
+        const createPost: ProfileEntity = await context.db.posts.create(args.input);
+        return createPost;
+      },
+    },
+    updateUser: {
+      type: userType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: userInput },
+      },
+      async resolve(source, args, context) {
+        const user = await context.db.users.findOne({ key: "id", equals: args.id });
+        if (user === null || !user) {
+          throw new Error(`User ${args.id} not exist`);
+        } else {
+          const updatedUser = await context.db.users.change(args.id, args.input);
+          return updatedUser;
+        }
+      },
+    },
+    updateProfile: {
+      type: profileType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: profileInput },
+      },
+      async resolve(source, args, context) {
+        const profile = await context.db.profiles.findOne({ key: "id", equals: args.id });
+        if (profile === null || !profile) {
+          throw new Error(`Profile ${args.id} not exist`);
+        } else {
+          const updatedProfile = await context.db.profiles.change(args.id, args.input);
+          return updatedProfile;
+        }
+      },
+    },
+    updatePost: {
+      type: postType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: postInput },
+      },
+      async resolve(source, args, context) {
+        const post = await context.db.posts.findOne({ key: "id", equals: args.id });
+        if (post === null || !post) {
+          throw new Error(`Post ${args.id} not exist`);
+        } else {
+          const updatedpost = await context.db.posts.change(args.id, args.input);
+          return updatedpost;
+        }
+      },
+    },
+    updateMemberType: {
+      type: memberType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: memberTypeInput },
+      },
+      async resolve(source, args, context) {
+        const member = await context.db.memberTypes.findOne({
+          key: "id",
+          equals: args.id,
+        });
+        if (member === null || !member) {
+          throw new Error(`MemberType ${args.id} not exist`);
+        }
+        const memberType = await context.db.memberTypes.change(args.id, args.input);
+        return memberType;
+      },
+    },
+  },
+});
+
 export const Schema: GraphQLSchema = new GraphQLSchema({
   query: queryType,
+  mutation: mutationType,
   types: [userType],
 });

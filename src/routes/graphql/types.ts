@@ -1,4 +1,4 @@
-import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLID, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
 export const userType = new GraphQLObjectType({
   name: "userType",
@@ -64,5 +64,45 @@ export const usersAllFields = new GraphQLObjectType({
     memberType: {
       type: memberType,
     },
+  }),
+});
+
+export const userInput = new GraphQLInputObjectType({
+  name: "userInput",
+  fields: () => ({
+    firstName: { type: GraphQLString },
+    lastName: { type: GraphQLString },
+    email: { type: GraphQLString },
+  }),
+});
+
+export const profileInput = new GraphQLInputObjectType({
+  name: "profileInput",
+  fields: () => ({
+    avatar: { type: GraphQLString },
+    sex: { type: GraphQLString },
+    birthday: { type: GraphQLInt },
+    country: { type: GraphQLString },
+    street: { type: GraphQLString },
+    city: { type: GraphQLString },
+    memberTypeId: { type: GraphQLString },
+    userId: { type: GraphQLString },
+  }),
+});
+
+export const postInput = new GraphQLInputObjectType({
+  name: "postInput",
+  fields: () => ({
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    userId: { type: GraphQLString },
+  }),
+});
+
+export const memberTypeInput = new GraphQLInputObjectType({
+  name: "memberTypeInput",
+  fields: () => ({
+    discount: { type: GraphQLInt },
+    monthPostsLimit: { type: GraphQLInt },
   }),
 });
