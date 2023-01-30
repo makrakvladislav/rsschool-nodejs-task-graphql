@@ -147,7 +147,7 @@ const queryType = new GraphQLObjectType({
             return relatedUser.id;
           });
           const profile = await context.db.profiles.findOne({ key: "userId", equals: user.id });
-          return Object.assign(user, { userSubscribedTo: userSubscribedTo.id }, { profile: profile });
+          return Object.assign(user, { userSubscribedTo: userSubscribedTo }, { profile: profile });
         });
         return result;
       },
